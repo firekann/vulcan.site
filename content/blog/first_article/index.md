@@ -41,4 +41,4 @@ tags: ["server", "homeserver"]
     -   Stable Diffusion Webui
 
 -   Container
-    -   bolg
+    -   blog
