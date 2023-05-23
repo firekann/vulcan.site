@@ -36,6 +36,12 @@ const AboutPage = ({ data, location }: PageProps<GatsbyTypes.AboutPageQuery>) =>
         noSiteName
       />
       <Profile />
+      <div>
+        조회수: <span id='busuanzi_value_site_pv'></span>
+      </div>
+      <div>
+        방문자수: <span id='busuanzi_value_site_uv'></span>
+      </div>
       <h1>I am</h1>
       <p>중앙대학교에서 소프트웨어를 전공중입니다. 보통 '불칸'이라는 아이디로 활동하고 있습니다.</p>
     </Layout>

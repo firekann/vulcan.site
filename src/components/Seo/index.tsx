@@ -6,8 +6,8 @@ import { useSeo } from '~/hooks/useSeo';
 interface Props {
   description: string;
   lang: string;
-  title: string;
   meta?: Metadata[];
+  title: string;
   noSiteName?: boolean;
 }
 
@@ -19,7 +19,7 @@ const Seo = ({ description, lang, meta = [], title, noSiteName = false }: Props)
   }
 
   const metaDescription = description || site.siteMetadata?.description;
-  const defaultTitle= site.siteMetadata?.title;
+  const defaultTitle = site.siteMetadata?.title;
 
   return (
     <Helmet
@@ -62,7 +62,9 @@ const Seo = ({ description, lang, meta = [], title, noSiteName = false }: Props)
           content: metaDescription,
         },
       ].concat(meta)}
-    />
+    >
+      <script async src='//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js'></script>
+    </Helmet>
   );
 };
 
