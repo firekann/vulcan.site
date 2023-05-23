@@ -1,15 +1,42 @@
 import siteMetadata from './blog-config';
 
+
 interface FeedSerializeProps {
   query: {
-    site: GatsbyTypes.Site,
+    site: GatsbyTypes.Site;
     allMarkdownRemark: {
-      nodes: GatsbyTypes.MarkdownRemark[],
-    }
-  }
+      nodes: GatsbyTypes.MarkdownRemark[];
+    };
+  };
 }
 
 export const plugins = [
+  {
+    resolve: 'gatsby-plugin-google-gtag',
+    options: {
+      trackingIds: [siteMetadata.googleAnalytics],
+      gtagConfig: {
+        anonymize_ip: true,
+      },
+      pluginConfig: {
+        head: true,
+      },
+    },
+  },
+  {
+    resolve: 'gatsby-plugin-firebase',
+    options: {
+      credentials: {
+        apiKey: process.env.API_KEY,
+        authDomain: process.env.AUTH_DOMAIN,
+        databaseURL: process.env.DATABASE_URL,
+        projectId: process.env.PROJECT_ID,
+        storageBucket: process.env.STORAGE_BUCKET,
+        messagingSenderId: process.env.MESSAGING_SENDER_ID,
+        appId: process.env.APP_ID,
+      },
+    },
+  },
   'gatsby-plugin-image',
   {
     resolve: 'gatsby-plugin-module-resolver',
@@ -55,13 +82,13 @@ export const plugins = [
           options: {
             className: 'heading-anchor',
             isIconAfterHeader: true,
-          }
+          },
         },
         {
           resolve: 'gatsby-remark-katex',
           options: {
             strict: 'ignore',
-          }
+          },
         },
         'gatsby-remark-external-links',
         'gatsby-remark-prismjs',
@@ -72,15 +99,6 @@ export const plugins = [
   },
   'gatsby-transformer-sharp',
   'gatsby-plugin-sharp',
-  {
-    resolve: 'gatsby-plugin-google-analytics',
-    options: {
-      trackingId: siteMetadata.googleAnalytics,
-      head: true,
-      anonymize: true,
-      defer: true,
-    },
-  },
   {
     resolve: 'gatsby-plugin-feed',
     options: {
@@ -98,17 +116,22 @@ export const plugins = [
       `,
       feeds: [
         {
-          serialize: ({ query: { site, allMarkdownRemark } }: FeedSerializeProps) => allMarkdownRemark.nodes.map((node) => {
-            const url = `${site.siteMetadata?.siteUrl ?? ''}${node.fields?.slug ?? ''}`;
-            return {
-              ...node.frontmatter,
-              url,
-              description: node.excerpt,
-              date: node.frontmatter?.date,
-              guid: url,
-              custom_elements: [{ 'content:encoded': node.html }],
-            };
-          }),
+          serialize: ({
+            query: { site, allMarkdownRemark },
+          }: FeedSerializeProps) =>
+            allMarkdownRemark.nodes.map((node) => {
+              const url = `${site.siteMetadata?.siteUrl ?? ''}${
+                node.fields?.slug ?? ''
+              }`;
+              return {
+                ...node.frontmatter,
+                url,
+                description: node.excerpt,
+                date: node.frontmatter?.date,
+                guid: url,
+                custom_elements: [{ 'content:encoded': node.html }],
+              };
+            }),
           query: `
             {
               allMarkdownRemark(
@@ -129,7 +152,6 @@ export const plugins = [
             }
           `,
           output: '/rss.xml',
-          title: 'Gatsby Starter Lavendar RSS Feed',
         },
       ],
     },
@@ -148,12 +170,11 @@ export const plugins = [
   },
   'gatsby-plugin-react-helmet',
   'gatsby-plugin-offline',
-  'gatsby-plugin-typegen'
+  'gatsby-plugin-typegen',
 ];
 
 export { siteMetadata };
 
 export const flags = {
   DEV_SSR: true,
-  PARALLEL_QUERY_RUNNING: false, // Disabled due to PQR-related build issue. see https://github.com/gatsbyjs/gatsby/discussions/32389#discussioncomment-1034690
 };

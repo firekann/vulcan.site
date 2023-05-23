@@ -20,7 +20,7 @@ const ExternalLink = ({ username, urlPrefix, children }: PropsWithChildren<Socia
 
   return (
     <LinkItem>
-      <a href={`${urlPrefix}${username}`}>{ children }</a>
+      <a href={`${urlPrefix}${username}`}>{children}</a>
     </LinkItem>
   );
 };
@@ -67,7 +67,7 @@ const Profile = () => {
         className='profile-image'
         layout='fixed'
         formats={['auto', 'webp', 'avif']}
-        src='../../images/profile-pic.jpeg'
+        src='../../images/fire.jpeg'
         width={70}
         height={70}
         quality={95}
@@ -82,9 +82,9 @@ const Profile = () => {
 
         <ExternalLinks>
           {isAboutPageExists &&
-              <LinkItem>
-                <Link to={'/about'}>About</Link>
-              </LinkItem>
+            <LinkItem>
+              <Link to={'/about'}>About</Link>
+            </LinkItem>
           }
           {Object.entries(social ?? {}).map(([key, username]) => {
             const serviceName = key as keyof GatsbyTypes.Social;

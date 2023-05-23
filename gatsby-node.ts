@@ -76,7 +76,6 @@ export const createSchemaCustomization = ({ actions }: CreateSchemaCustomization
       description: String
       siteUrl: String
       social: Social
-      thumbnail: String
     }
 
     type Social {
@@ -97,7 +96,6 @@ export const createSchemaCustomization = ({ actions }: CreateSchemaCustomization
       description: String
       date: Date @dateformat
       tags: [String]
-      thumbnail: String
     }
 
     type Fields {

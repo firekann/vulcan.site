@@ -13,35 +13,21 @@ import Layout from '~/layout';
 import 'katex/dist/katex.min.css';
 
 import {
-  Article, TableOfContents, Content, Footer, Header, ArticleMetadata, Title
+  Article, TableOfContents, Content, Footer, Header, Metadata, Title
 } from './styles';
 
 
 const BlogPostTemplate = ({ data, location }: PageProps<GatsbyTypes.BlogPostBySlugQuery>) => {
   const post = data.markdownRemark!;
-  const siteUrl = data.site?.siteMetadata?.siteUrl ?? '';
   const siteTitle = data.site?.siteMetadata?.title ?? '';
-  const siteThumbnail = data.site?.siteMetadata?.thumbnail;
   const { previous, next } = data;
-  const { title, description, date, tags, thumbnail } = post.frontmatter!;
+  const { title, description, date, tags } = post.frontmatter!;
   const commentConfig = useComment().site?.siteMetadata?.comment;
 
   const disqusConfig = {
     title,
     identifier: post.fields?.slug,
   };
-  const meta: Metadata[] = [];
-
-  if (siteThumbnail || thumbnail) {
-    const properties = ['og:image', 'twitter:image'];
-
-    for (const property of properties) {
-      meta.push({
-        property,
-        content: `${siteUrl}${thumbnail ?? siteThumbnail}`,
-      });
-    }
-  }
 
   return (
     <Layout location={location} title={siteTitle}>
@@ -49,7 +35,6 @@ const BlogPostTemplate = ({ data, location }: PageProps<GatsbyTypes.BlogPostBySl
         lang='en'
         title={title ?? ''}
         description={description ?? post.excerpt ?? ''}
-        meta={meta}
       />
       <Article
         itemScope
@@ -57,10 +42,14 @@ const BlogPostTemplate = ({ data, location }: PageProps<GatsbyTypes.BlogPostBySl
       >
         <Header>
           <Title itemProp='headline'>{title}</Title>
-          <ArticleMetadata>
+          <Metadata>
             <span>{date}</span>
             <Tags tags={tags as string[]} />
-          </ArticleMetadata>
+            <div id='busuanzi_container_page_pv' style={{'marginLeft':'20px'}}> 
+              조회수 <span id='busuanzi_value_page_pv'></span> 회 
+            </div>
+          </Metadata>
+
         </Header>
         <TableOfContents
           dangerouslySetInnerHTML={{ __html: post.tableOfContents ?? '' }}
@@ -93,8 +82,6 @@ export const pageQuery = graphql`
     site {
       siteMetadata {
         title
-        siteUrl
-        thumbnail
       }
     }
     markdownRemark(id: { eq: $id }) {
@@ -110,7 +97,6 @@ export const pageQuery = graphql`
         date(formatString: "YYYY-MM-DD")
         description
         tags
-        thumbnail
       }
     }
     previous: markdownRemark(id: { eq: $previousPostId }) {

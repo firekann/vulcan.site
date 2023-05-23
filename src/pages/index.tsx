@@ -24,9 +24,7 @@ const BlogIndex = ({ data, location }: PageProps<GatsbyTypes.BlogIndexQuery>) =>
   const siteMetadata = useSeo().site?.siteMetadata;
   const tags = useArticleTags().allMarkdownRemark?.distinct as string[];
 
-  const siteUrl = data.site?.siteMetadata?.siteUrl ?? '';
   const siteTitle = data.site?.siteMetadata?.title ?? '';
-  const siteThumbnail = data.site?.siteMetadata?.thumbnail;
   const posts = filterPostsByTag(
     filterPostsByTitle(
       data.allMarkdownRemark.nodes, titleFilter),
@@ -35,7 +33,7 @@ const BlogIndex = ({ data, location }: PageProps<GatsbyTypes.BlogIndexQuery>) =>
   const articlePerPage = 5;
   const totalPage = Math.ceil(posts.length / articlePerPage);
 
-  const onTitleFilterChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+  const onTitleFilterChange = useCallback((event) => {
     setTitleFilter(event.target.value);
   }, []);
 
@@ -43,18 +41,6 @@ const BlogIndex = ({ data, location }: PageProps<GatsbyTypes.BlogIndexQuery>) =>
     setTitleFilter('');
     setCurrentTag(TAG.ALL);
   };
-
-  const meta: Metadata[] = [];
-  if (siteThumbnail) {
-    const properties = ['og:image', 'twitter:image'];
-
-    for (const property of properties) {
-      meta.push({
-        property,
-        content: `${siteUrl}${siteThumbnail}`,
-      });
-    }
-  }
 
   useInfiniteScroll(infiniteScrollRef, useCallback(() => {
     if (page < totalPage) {
@@ -69,10 +55,13 @@ const BlogIndex = ({ data, location }: PageProps<GatsbyTypes.BlogIndexQuery>) =>
         lang='en'
         title={siteMetadata?.title ?? ''}
         description={siteMetadata?.description ?? ''}
-        meta={meta}
         noSiteName
       />
       <Profile />
+      <section style={{height:'20px'}}>
+        조회수 <span id = 'busuanzi_value_site_pv' ></span> 회 <br />
+        방문자 <span id = 'busuanzi_value_site_uv' ></span> 명
+      </section>
       <ArticleFilter
         tags={tags}
         titleFilter={titleFilter}
@@ -101,8 +90,6 @@ export const pageQuery = graphql`
     site {
       siteMetadata {
         title
-        siteUrl
-        thumbnail
       }
     }
     allMarkdownRemark(sort: { fields: [frontmatter___date], order: DESC }) {

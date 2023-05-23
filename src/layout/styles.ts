@@ -1,10 +1,9 @@
-import { styled, globalCss } from '~/stitches.config';
+import { styled, global } from '~/stitches.config';
 
-export const globalStyles = (colorScheme: 'light' | 'dark') => globalCss({
+export const globalStyles = global({
   ':root': {
     fontFamily: '"Pretendard", apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
     textRendering: 'optimizeLegibility',
-    colorScheme: colorScheme,
   },
   '*': {
     boxSizing: 'border-box',
@@ -54,7 +53,6 @@ export const globalStyles = (colorScheme: 'light' | 'dark') => globalCss({
   img: {
     display: 'block',
     margin: '0 auto',
-    maxWidth: '100%',
   },
   table: {
     width: '100%',
@@ -80,10 +78,6 @@ export const globalStyles = (colorScheme: 'light' | 'dark') => globalCss({
     marginBottom: '0.75rem',
 
     lineHeight: 1.625,
-
-    '> code[class*="language-"]': {
-      whiteSpace: 'pre-wrap',
-    },
   },
   blockquote: {
     paddingLeft: '1rem',
@@ -113,11 +107,10 @@ export const globalStyles = (colorScheme: 'light' | 'dark') => globalCss({
       borderRadius: '0.25rem',
     }
   },
-  ':not(pre) > code[class*="language-"]': {
-    color: '$inlineCodeColor',
-    background: '$inlineCodeBackground',
-  }
-})();
+  'pre[class*="language-"], code[class*="language-"]': {
+    whiteSpace: 'pre-wrap',
+  },
+});
 export const Root = styled('div', {
   display: 'flex',
   minHeight: '100vh',
