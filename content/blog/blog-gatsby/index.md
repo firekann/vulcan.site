@@ -81,7 +81,7 @@ sudo service nginx reload                                                       
 ```sh
 ip a
 ```
-![ip](./ip.png)
+![find_ip](./find_ip.png)
 
 위 커맨드를 쳐서 나오는 아이피 + 위에 설정한 포트 번호로 접속하면 된다.
 
