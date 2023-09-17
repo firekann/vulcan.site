@@ -22,24 +22,27 @@ tags: ["blog", "gatsby"]
 아래 커맨드를 따라가면 된다.
 
 ```sh
-adduser USERNAME                    //유저 추가
-usermod -aG sudo USERNAME           //sudo 그룹에 추가(이 아래는 추가한 유저로 진행)
+adduser USERNAME                    #유저 추가
+usermod -aG sudo USERNAME           #sudo 그룹에 추가(이 아래는 추가한 유저로 진행)
 ```
+
 "USERNAME"은 유저 이름이다.
+
 ```sh
 sudo apt update && sudo apt upgrade
-sudo apt install git                //깃 설치
-git clone YOUR_GIT_URL              //git repo에서 git clone
-cd MY_BLOG_STARTER/                 //clone한 repo로 이동
-sudo apt install npm                //npm 설치
-sudo npm install -g n               //nodejs 버전관리 플러그인
-sudo n lts                          //lts 버전
-sudo n prune                        //이전 버전 삭제
-sudo npm install                    //패키지 설치
-sudo npm install -g npm@latest      //npm 최신 버전
-sudo npm install -g gatsby-cli      //gatsby 설치
-gatsby build                        //gatsby build
+sudo apt install git                #깃 설치
+git clone YOUR_GIT_URL              #git repo에서 git clone
+cd MY_BLOG_STARTER/                 #clone한 repo로 이동
+sudo apt install npm                #npm 설치
+sudo npm install -g n               #nodejs 버전관리 플러그인
+sudo n lts                          #lts 버전
+sudo n prune                        #이전 버전 삭제
+sudo npm install                    #패키지 설치
+sudo npm install -g npm@latest      #npm 최신 버전
+sudo npm install -g gatsby-cli      #gatsby 설치
+gatsby build                        #gatsby build
 ```
+
 "YOUR_GIT_URL"은 생성한 깃 레포지토리의 주소이다.
 
 "MY_BLOG_STARTER"는 클론된 디렉토리이다.
@@ -59,10 +62,12 @@ gatsby build                        //gatsby build
 웹서버로 nginx를 사용해서 정적 웹페이지를 띄워준다.
 
 ```sh
-sudo apt install nginx                              //nginx 설치
-sudo nano /etc/nginx/sites-available/static.site    //설정파일 편집
+sudo apt install nginx                              #nginx 설치
+sudo nano /etc/nginx/sites-available/static.site    #설정파일 편집
 ```
+
 아래 설정을 복붙해준다.
+
 ```nginx
 server {
         listen       YOUR_PORT_NUMBER;
@@ -72,15 +77,19 @@ server {
         root         YOUR_PUBLIC_FILE_PATH;
 }
 ```
+
 "YOUR_PORT_NUMBER"를 원하는 포트 번호로, YOUR_PUBLIC_FILE_PATH를 빌드된 public 디렉토리 경로로 바꿔야한다.
+
 ```sh
-sudo ln -s /etc/nginx/sites-available/static.site /etc/nginx/sites-enabled/     //링크
-sudo nginx -t                                                                   //테스트
-sudo service nginx reload                                                       //nginx reload
+sudo ln -s /etc/nginx/sites-available/static.site /etc/nginx/sites-enabled/     #링크
+sudo nginx -t                                                                   #테스트
+sudo service nginx reload                                                       #nginx reload
 ```
+
 ```sh
 ip a
 ```
+
 ![find_ip](./find_ip.png)
 
 위 커맨드를 쳐서 나오는 아이피 + 위에 설정한 포트 번호로 접속하면 된다.
@@ -94,25 +103,32 @@ ip a
 작성한 글은 깃허브에 올라가게 된다. 다만 글을 쓸때마다 서버에 접속해서 git pull을 하고 gatsby build를 해주는 것을 번거로운 일이다. 때문에 이것을 crontab과 간단한 스크립트로 자동화하도록 하자.
 
 ```sh
-sudo nano MY_BLOG_STARTER/build.sh      //build 스크립트 작성
+sudo nano MY_BLOG_STARTER/build.sh      #build 스크립트 작성
 ```
+
 아래 스크립트로 복붙한다.
+
 ```sh
 git pull
 gatsby build
 ```
+
 ```sh
-sudo nano /etc/crontab                  //crontab 수정
+sudo nano /etc/crontab                  #crontab 수정
 ```
+
 맨 밑에 아래 명령어를 복붙한다.
+
 ```sh
-*/30 * * * * USERNAME cd MY_BLOG_STARTER && bash build.sh   //30분 마다 실행된다.
+*/30 * * * * USERNAME cd MY_BLOG_STARTER && bash build.sh   #30분 마다 실행된다.
 ```
+
 "USERNAME"은 유저 이름이다.
 
 "MY_BLOG_STARTER"는 클론된 디렉토리이다.
+
 ```sh
-sudo service cron reload                //cron reload
+sudo service cron reload                #cron reload
 ```
 
 proxmox의 CPU모니터링 그래프를 보면 30분마다 실행되고 빌드가 되면서 CPU 사용량이 올라가는 것을 볼 수 있다.
