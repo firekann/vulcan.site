@@ -15,6 +15,7 @@ tags: ["server", "homeserver"]
     | SSD | SK hynix GOLD P31 NVMe 2TB | 2ea(ZFS MIRROR) |
     | | SK hynix GOLD P31 NVMe 500GB | 2ea(ZFS STRIPE) |
     | GPU | NVIDIA® QUADRO® P4000 | 1ea |
+    | | NVIDIA® QUADRO® P2000 | 1ea |
     | NET card | RTL8125B 2.5G quad port NETWORK adapter | 1ea |
     | | Chelsio T540-CR Quad Port SFP+ 10GbE | 1ea |
     | | Mellanox MCX354A-FCBT CONNECTX-3 | 1ea |
