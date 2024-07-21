@@ -12,12 +12,11 @@ jobs:
 
     steps:
     - name: executing remote ssh commands using password
-      uses: appleboy/ssh-action@v1.0.0
+      uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
-        port: ${{ secrets.PORT }}
         timeout: 60s
         script: |
           whoami
