@@ -199,7 +199,7 @@ By initializing `$monitor_hosts` as an array and checking if it is empty before 
 
 Upon thinking of this solution and wanting to contribute to the package, I discovered the pfSense package repository. To my surprise, the issue was already resolved using this exact method. Had I been more proactive, the issue could have been resolved sooner. Additionally, it seems that this patch will be included in pfSense CE 2.8.0 and pfSense Plus 24.08, resolving the problem in future versions.
 
-## Postscript
+# Conclusion
 
 This issue was reported immediately after the pfSense CE 2.7 update. However, no solution was widely known until recently, apart from this [document](https://redmine.pfSense.org/issues/14861), which did not provide a detailed resolution process. Hence, I decided to write this post. I hope this guide helps others who have been stressed by the same error to resolve it successfully.
 
