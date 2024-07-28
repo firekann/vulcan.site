@@ -130,11 +130,21 @@ Ping Host는 입력하는 창은 아래와 같이 돼 있다.
 
 위에서 설명했듯이 `Ping Host`에 IP가 하나도 들어있지 않아서 발생하는 문제다. 때문에 `Ping Host`에 한 개 이상 IP를 추가하면 오류를 해결할 수 있다. 그런데 앞서 [1 오류](#1-오류)에서 "GUI로 관리할 수 있었는데, 이 Telegraf 선택지가 사라졌다."라고 했다. 그럼 어떻게 설정을 수정할 수 있을까?
 
-pfSense는 `/conf/config.xml`이 모든 package들의 configuration이 저장된다. 이 파일을 열어보면 `<telegraf>`에 `<ping_host_1></ping_host_1>`항목이 있다. 여기에 `<ping_host_1>db.server.ip.addr</ping_host_1>`이런 식으로 IP를 추가하고 저장해주면 된다.
+pfSense는 `/conf/config.xml`이 모든 package들의 configuration이 저장된다. 이 파일을 열어보면 `<telegraf>`에 `<ping_host_1></ping_host_1>`항목이 있다. 여기에 아래와 같이 IP를 추가하고 저장해주면 된다.
+
+```xml
+<ping_host_1>db.server.ip.addr</ping_host_1>
+```
 
 ## 3.2 Ping Monitor 옵션 비활성화
 
-위에 [코드](#21-오류가-발생한-코드)를 살펴보면 `if ($telegraf_conf["ping_enable"]) {`여기에 `ping_enable`옵션이 켜져 있는지 확인하는 코드가 있다. 만약 Ping Monitor 옵션이 커져있다면, 문제가 되는 line 132 또한 실행되지 않을 것이다. 이 또한 `/conf/config.xml`에 `<ping_enable>on</ping_enable>`항목이 있다. 여기서 `on`을 지워주면 Ping Monitor 옵션을 비활성화한 것이다. 이것으로 오류를 해결할 수 있다.
+위에 [코드](#21-오류가-발생한-코드)를 살펴보면 `if ($telegraf_conf["ping_enable"]) {`여기에 `ping_enable`옵션이 켜져 있는지 확인하는 코드가 있다. 만약 Ping Monitor 옵션이 커져있다면, 문제가 되는 line 132 또한 실행되지 않을 것이다. 이 또한 `/conf/config.xml`에 `<ping_enable>on</ping_enable>`항목이 있다. 여기서 아래와 같이 `on`을 지워주면 Ping Monitor 옵션을 비활성화한 것이다.
+
+```xml
+<ping_enable></ping_enable>
+```
+
+이것으로 오류를 해결할 수 있다.
 
 ## 3.3 telegraf.inc 변경
 

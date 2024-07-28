@@ -1,15 +1,13 @@
 ---
-title: How to Resolve Telegraf Errors After Upgrading to pfSense 2.7
+title: How to Fix Telegraf Errors After Upgrading to pfSense 2.7
 date: "2024-07-28T00:00:00Z"
 description: "pfSense Telegraf Error"
 tags: ["server", "pfSense", "error"]
 ---
 
--   This article was automatically translated using GPT. There may be some inaccuracies in the translation.
-
 # 1 Error
 
-After upgrading from pfSense CE version 2.6 to version 2.7, I encountered the following error repeatedly:
+After upgrading from pfSense CE version 2.6 to version 2.7, I encountered the following error continuously:
 
 ```
 PHP Fatal error: Uncaught TypeError: implode(): Argument #1 ($pieces) must be of type array, string given in /usr/local/pkg/telegraf.inc:132
@@ -22,15 +20,17 @@ Stack trace:
 thrown in /usr/local/pkg/telegraf.inc on line 132
 ```
 
-I noticed that this error caused the disappearance of the Telegraf option under Services in the GUI, which is used to manage telegraf settings. Telegraf is responsible for sending collected information from pfSense to the database. When this error occurs, telegraf stops working. Although deleting telegraf, restarting pfSense, and reinstalling telegraf allows it to work with previous settings, the error persists and the GUI access remains unavailable.
+Additionally, I noticed that the option to manage Telegraf settings through the GUI, which was previously accessible under Service -> Telegraf, has disappeared. Telegraf in pfSense is responsible for sending collected information to a database. However, with this error, Telegraf no longer functions.
 
-# 2 Why Did This Error Occur?
+By uninstalling Telegraf, restarting pfSense, and then reinstalling Telegraf immediately after the restart, it resumes working with the previous settings. Despite this, the error persists and GUI access remains unavailable.
 
-## 2.1 The Code That Causes the Error
+## 2 Why Does This Error Occur?
 
-The error occurs in the `telegraf.inc` file, which is responsible for resynchronizing the configuration settings in `/usr/local/etc/telegraf.conf`. This code runs when telegraf settings are changed via the GUI or when telegraf is reinstalled.
+### 2.1 Code Causing the Error
 
-Let's examine the code where the error occurs:
+The error occurs in the `telegraf.inc` file. This file contains the code responsible for performing the `telegraf_resync_config` task, which resynchronizes the `/usr/local/etc/telegraf.conf` file according to the configuration values. This task is executed when Telegraf settings are changed via the GUI or when Telegraf is reinstalled (there might be additional conditions, but these two are confirmed).
+
+First, let's examine the code where the error occurs. You can view this using pfSense's Edit File feature.
 
 ```PHP
 //      /usr/local/pkg/telegraf.inc
@@ -43,10 +43,10 @@ Let's examine the code where the error occurs:
                         $monitor_hosts[] = '"' . $telegraf_conf["ping_host_2"] . '"';
                 }
                 if (!empty($telegraf_conf['ping_host_3'])) {
-                        $monitor_hosts[] = '"' . $telegraf_conf["ping_host_3'] . '"';
+                        $monitor_hosts[] = '"' . $telegraf_conf["ping_host_3"] . '"';
                 }
                 if (!empty($telegraf_conf['ping_host_4'])) {
-                        $monitor_hosts[] = '"' . $telegraf_conf["ping_host_4'] . '"';
+                        $monitor_hosts[] = '"' . $telegraf_conf["ping_host_4"] . '"';
                 }
 
                 $monitor_hosts = implode(",", $monitor_hosts);      // line 132
@@ -57,7 +57,7 @@ Let's examine the code where the error occurs:
         }
 ```
 
-The code tries to construct a configuration for telegraf's ping monitor as follows:
+Examining the code at the line where the error occurs, the values of `ping_host_*` are fetched from `$telegraf_conf` and formatted as follows:
 
 ```
 [[inputs.ping]]
@@ -65,19 +65,29 @@ The code tries to construct a configuration for telegraf's ping monitor as follo
 	deadline = 0
 ```
 
-This enables telegraf to ping specified IPs and check if the target servers are alive. However, this feature is optional and can be disabled in the pfSense telegraf settings.
+This section allows Telegraf to send ping messages to specified IP addresses and receive results to verify if the target servers are alive. It is not a mandatory feature and can be disabled in the pfSense Telegraf settings.
 
-## 2.2 Where the Error Occurs
+### 2.2 Location of the Error
 
-The error message indicates that line 132 in `telegraf.inc` causes the error because `implode(',', NULL)` is invalid. This happens because `$monitor_hosts` is `NULL`. If the `ping_host_*` values in `$telegraf_conf` are empty, `$monitor_hosts` remains unset or `NULL`. In PHP, a variable that is not explicitly initialized can be `NULL`, and PHP 8 does not allow `implode` to be called with a `NULL` value.
+The error message indicates that the error occurs at line 132 of `telegraf.inc` due to `implode(',', NULL)`. When examining line 132 of the `telegraf.inc` file, the code `$monitor_hosts = implode(",", $monitor_hosts);` is found, implying that `$monitor_hosts` is `NULL`. Why does this happen? Before line 132, the `if` statements attempt to add `ping_host_*` values to the `$monitor_hosts` array. If there are no `ping_host_*` values in `telegraf_conf`, `$monitor_hosts` remains empty.
 
-## 2.3 Why Did This Error Occur After the Upgrade?
+In PHP, variables are automatically created when they are first used, even if they are not explicitly initialized. However, if a variable is not explicitly initialized, it can have a `NULL` value. Therefore, if none of the conditions in the `if` statements are satisfied, `$monitor_hosts` can end up being `NULL`.
 
-The upgrade notes for pfSense CE 2.7 indicate that PHP was upgraded from version 7.4.X to 8.2.6. In PHP 7, calling `implode` with a `NULL` value was allowed, but in PHP 8, stricter type checking causes an error. Hence, upgrading pfSense caused this issue due to the new PHP version.
+pfSense CE 2.7 uses PHP version 8. In PHP 8, calling `implode` with a `NULL` value is not allowed. As a result, the format `implode(',', NULL)` will trigger an error.
 
-## 2.4 Why Was This Not Prevented?
+This change in PHP's behavior means that the previously acceptable code now results in an error in pfSense 2.7. The solution involves ensuring that `$monitor_hosts` is always initialized as an array before it is used in the `implode` function. This can be done by initializing `$monitor_hosts` as an empty array before the `if` statements.
 
-Telegraf works even if `urls` is empty. The `telegraf/plugins/inputs/ping/ping.go` file handles this scenario gracefully:
+### 2.3 Why Did the Error Occur After the Upgrade?
+
+Reviewing the pfSense CE 2.7 upgrade notes, it becomes clear that the PHP version was upgraded from 7.4.X to 8.2.6. In PHP 7, it was permissible to call `implode` with a `NULL` value. Depending on the implementation, the return value of `implode` could be either `NULL` or an empty string. Therefore, even if `$monitor_hosts` contained nothing, no error would occur.
+
+However, as previously explained, PHP 8 enforces stricter type checking. As a result, calling `implode` with a `NULL` value triggers an error. Consequently, when upgrading from pfSense 2.6 to 2.7, the PHP version was also upgraded to version 8, which introduced this issue.
+
+The change in PHP's behavior due to the version upgrade directly caused the problem. The code that worked correctly in PHP 7.4.X no longer functions as expected in PHP 8.2.6 because of the stricter type enforcement, leading to the observed error.
+
+### 2.4 Why Wasn't This Prevented?
+
+First, it's important to note that Telegraf functions without any issues even if the URLs are empty. Let's look at the relevant code in `telegraf/plugins/inputs/ping/ping.go`.
 
 ```go
 func (p *Ping) Gather(acc telegraf.Accumulator) error {
@@ -101,9 +111,9 @@ func (p *Ping) Gather(acc telegraf.Accumulator) error {
 }
 ```
 
-If `p.Urls` is empty, no ping operations are performed, and there are no issues.
+In this code, the ping operation is attempted. Even if `p.Urls` is empty, no issues arise; the ping task simply doesn't execute. Since `p.wg.Add(1)` and `p.wg.Done()` aren't called, `p.wg.Wait()` is invoked immediately, avoiding any synchronization issues.
 
-Currently, enabling the Ping Monitor option and saving without any Ping Host values results in a crash report:
+Currently, if you enable the "Enable Ping Monitor" option in pfSense's Telegraf settings and save without specifying any "Ping Host," you get a crash report like the following:
 
 ```
 PHP Fatal error:  Uncaught TypeError: implode(): Argument #1 ($array) must be of type array, string given in /usr/local/pkg/telegraf.inc:132
@@ -115,67 +125,90 @@ Stack trace:
   thrown in /usr/local/pkg/telegraf.inc on line 132
 ```
 
-However, pfSense does not validate this condition when saving the settings, resulting in the error only in pfSense CE 2.7 and later versions.
+However, this crash report is generated by the PHP error described earlier and is not a result of pfSense's internal format validation upon saving the Telegraf settings via the GUI. This means that in pfSense CE 2.6, it would have saved without any crash reports.
 
-# 3 How to Fix It
+The "Ping Host" input fields are displayed as follows:
+![Ping Host Input](.././Ping_Host_input.png)
 
-## 3.1 Add an IP to Ping Host
+Here, "Ping Host 1" does not have an `(optional)` label. Even so, pfSense does not issue a warning if left blank and saved. Therefore, anyone who enabled the "Enable Ping Monitor" option and saved without specifying a "Ping Host" prior to version 2.7 would have encountered the same error after upgrading.
 
-Since the error is caused by an empty `Ping Host`, adding at least one IP address to the `Ping Host` will fix it. Without GUI access, this can be done by editing `/conf/config.xml` and adding an IP address under `<ping_host_1>`:
+Various bug reports on this issue indicate that many users could not reproduce the problem. This is likely because they upgraded from pfSense 2.6 to 2.7 with the "Enable Ping Monitor" option disabled, preventing the issue from occurring.
+
+## 3 How to Fix It?
+
+### 3.1 Add an IP to Ping Host
+
+As explained earlier, the issue arises because there are no IP addresses specified in `Ping Host`. Adding at
+
+least one IP address to `Ping Host` will resolve the error. However, as noted in [1 Error](#1-error), the option to manage Telegraf settings via the GUI has disappeared. So, how can we modify the settings?
+
+pfSense stores the configuration for all packages in `/conf/config.xml`. Opening this file, you'll find an entry for `<telegraf>` that includes `<ping_host_1></ping_host_1>`. You can add an IP address to this entry as follows:
 
 ```xml
 <ping_host_1>db.server.ip.addr</ping_host_1>
 ```
 
-## 3.2 Disable Ping Monitor Option
+Save the changes, and this should resolve the error by ensuring that at least one IP address is specified.
 
-Disabling the Ping Monitor option will also prevent the error. This can be done by editing `/conf/config.xml` and removing the `<ping_enable>on</ping_enable>` entry.
+### 3.2 Disable Ping Monitor Option
 
-## 3.3 Modify telegraf.inc
+In the code examined in [2.1 Code Causing the Error](#21-code-causing-the-error), there is a check `if ($telegraf_conf["ping_enable"]) {` that verifies whether the `ping_enable` option is turned on. If the Ping Monitor option is disabled, line 132, which causes the issue, will not be executed. This option is also present in `/conf/config.xml` as `<ping_enable>on</ping_enable>`. Removing the `on` value will disable the Ping Monitor option.
 
-Initially, modifying `telegraf.inc` seemed like a solution, but this file is re-fetched from the server during package reinstallation or pfSense reboot, making changes non-permanent. However, for a temporary fix, the following modification can be made:
+To disable it, modify the entry to:
 
-```PHP
-        /* Ping Monitor Configuration */
-        if ($telegraf_conf["ping_enable"]) {
-                $monitor_hosts = array();
-                if (!empty($telegraf_conf['ping_host_1'])) {
-                        $monitor_hosts[] = '"' . $telegraf_conf["ping_host_1"] . '"';
-                }
-                if (!empty($telegraf_conf['ping_host_2'])) {
-                        $monitor_hosts[] = '"' . $telegraf_conf["ping_host_2"] . '"';
-                }
-                if (!empty($telegraf_conf['ping_host_3'])) {
-                        $monitor_hosts[] = '"' . $telegraf_conf["ping_host_3'] . '"';
-                }
-                if (!empty($telegraf_conf['ping_host_4'])) {
-                        $monitor_hosts[] = '"' . $telegraf_conf["ping_host_4'] . '"';
-                }
-
-                if (!empty($monitor_hosts)) {
-                    $monitor_hosts = implode(",", $monitor_hosts);      // line 132
-
-                    $cfg .= "\n[[inputs.ping]]\n";
-                    $cfg .= "\turls = [" . $monitor_hosts . "]";
-                    $cfg .= "\n\tdeadline = 0\n\n"; /* deadline (-w) function not supported in BSD ping */
-                }
-        }
+```xml
+<ping_enable></ping_enable>
 ```
 
-This code initializes `$monitor_hosts` as an array and checks if it is not empty before calling `implode`.
+This will turn off the Ping Monitor option and prevent the error from occurring. Save the changes, and the issue should be resolved.
 
-I discovered that this issue is already fixed in the pfSense package repository, and the fix will be included in pfSense CE 2.8.0 and pfSense Plus 24.08.
+### 3.3 Modify `telegraf.inc`
 
-# Conclusion
+Initially, it seemed that modifying the `telegraf.inc` file to fix the root cause of the problem would be a viable solution. However, the `telegraf.inc` file is re-downloaded from the server whenever the package is reinstalled or pfSense is rebooted. This means any changes made to the file are not permanent. Additionally, there is no straightforward way to restart the package after modifying the `telegraf.inc` file. Nonetheless, addressing the issue at its core is essential.
 
-This issue has been reported since the release of pfSense CE 2.7. Although there was no clear solution for a long time, I hope this post helps others resolve the error.
+Here is the modified code:
 
-Feel free to point out any errors or suggest improvements.
+```PHP
+/* Ping Monitor Configuration */
+if ($telegraf_conf["ping_enable"]) {
+    $monitor_hosts = array();
+    if (!empty($telegraf_conf['ping_host_1'])) {
+        $monitor_hosts[] = '"' . $telegraf_conf["ping_host_1"] . '"';
+    }
+    if (!empty($telegraf_conf['ping_host_2'])) {
+        $monitor_hosts[] = '"' . $telegraf_conf["ping_host_2"] . '"';
+    }
+    if (!empty($telegraf_conf['ping_host_3'])) {
+        $monitor_hosts[] = '"' . $telegraf_conf["ping_host_3"] . '"';
+    }
+    if (!empty($telegraf_conf['ping_host_4'])) {
+        $monitor_hosts[] = '"' . $telegraf_conf["ping_host_4"] . '"';
+    }
+
+    if (!empty($monitor_hosts)) {
+        $monitor_hosts = implode(",", $monitor_hosts); // line 132
+
+        $cfg .= "\n[[inputs.ping]]\n";
+        $cfg .= "\turls = [" . $monitor_hosts . "]";
+        $cfg .= "\n\tdeadline = 0\n\n"; /* deadline (-w) function not supported in BSD ping */
+    }
+}
+```
+
+By initializing `$monitor_hosts` as an array and checking if it is empty before proceeding, the issue can be resolved.
+
+Upon thinking of this solution and wanting to contribute to the package, I discovered the pfSense package repository. To my surprise, the issue was already resolved using this exact method. Had I been more proactive, the issue could have been resolved sooner. Additionally, it seems that this patch will be included in pfSense CE 2.8.0 and pfSense Plus 24.08, resolving the problem in future versions.
+
+## Postscript
+
+This issue was reported immediately after the pfSense CE 2.7 update. However, no solution was widely known until recently, apart from this [document](https://redmine.pfSense.org/issues/14861), which did not provide a detailed resolution process. Hence, I decided to write this post. I hope this guide helps others who have been stressed by the same error to resolve it successfully.
+
+Please note that there may be awkward expressions or inaccuracies in this post. All constructive feedback is welcome.
 
 # References
 
--   [telegraf inputs.ping](https://github.com/influxdata/telegraf/tree/master/plugins/inputs/ping)
--   [PHP implode](https://www.PHP.net/manual/en/function.implode.PHP)
--   [PHP manual Backward Incompatible Changes](https://www.PHP.net/manual/en/migration80.incompatible.PHP)
--   [pfSense CE 2.7 upgrade note](https://docs.netgate.com/pfSense/en/latest/releases/2-7-0.html)
--   [pfSense issues](https://redmine.pfSense.org/issues/14861)
+-   [Telegraf inputs.ping](https://github.com/influxdata/telegraf/tree/master/plugins/inputs/ping)
+-   [PHP implode](https://www.php.net/manual/en/function.implode.php)
+-   [PHP Manual Backward Incompatible Changes](https://www.php.net/manual/en/migration80.incompatible.php)
+-   [pfSense CE 2.7 Upgrade Notes](https://docs.netgate.com/pfSense/en/latest/releases/2-7-0.html)
+-   [pfSense Issues](https://redmine.pfSense.org/issues/14861)
