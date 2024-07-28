@@ -197,7 +197,7 @@ if ($telegraf_conf["ping_enable"]) {
 
 By initializing `$monitor_hosts` as an array and checking if it is empty before proceeding, the issue can be resolved.
 
-Upon thinking of this solution and wanting to contribute to the package, I discovered the pfSense package repository. To my surprise, the issue was already resolved using this exact method. Had I been more proactive, the issue could have been resolved sooner. Additionally, it seems that this patch will be included in pfSense CE 2.8.0 and pfSense Plus 24.08, resolving the problem in future versions.
+Upon thinking of this solution and wanting to contribute to the package, I discovered the pfSense package repository. To my surprise, the issue was already [resolved](https://github.com/pfsense/FreeBSD-ports/blob/devel/net-mgmt/pfSense-pkg-Telegraf/files/usr/local/pkg/telegraf.inc) using this exact method. Additionally, it seems that this patch will be included in pfSense CE 2.8.0 and pfSense Plus 24.08, resolving the problem in future versions.
 
 # Conclusion
 
@@ -212,3 +212,4 @@ Please note that there may be awkward expressions or inaccuracies in this post. 
 -   [PHP Manual Backward Incompatible Changes](https://www.php.net/manual/en/migration80.incompatible.php)
 -   [pfSense CE 2.7 Upgrade Notes](https://docs.netgate.com/pfSense/en/latest/releases/2-7-0.html)
 -   [pfSense Issues](https://redmine.pfSense.org/issues/14861)
+-   [issue fixed](https://github.com/pfsense/FreeBSD-ports/blob/devel/net-mgmt/pfSense-pkg-Telegraf/files/usr/local/pkg/telegraf.inc)

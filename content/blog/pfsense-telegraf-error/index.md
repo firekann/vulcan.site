@@ -63,7 +63,7 @@ thrown in /usr/local/pkg/telegraf.inc on line 132
 	deadline = 0
 ```
 
-이 부분은 telegraf가 ping메세지를 지정된 IP로 보내고 결과를 받아 목표로하는 서버가 살아있는지 확인할 수 있게 해줍니다. 필수적인 사항은 아니고, pfSense의 telegraf 설정에서 비활성화할 수 있다.
+이 부분은 telegraf가 ping메세지를 지정된 IP로 보내고 결과를 받아 목표로하는 서버가 살아있는지 확인할 수 있게 해준다. 필수적인 사항은 아니고, pfSense의 telegraf 설정에서 비활성화할 수 있다.
 
 ## 2.2 오류가 발생한 곳
 
@@ -103,7 +103,7 @@ func (p *Ping) Gather(acc telegraf.Accumulator) error {
 }
 ```
 
-여기서 ping을 시도한다. 여기서 `p.Urls`가 비어있다고 하더라도, ping작업을 수행하지 않을 뿐 문제는 생기지 않는다. `p.wg.Add(1)`과 `p.wg.Done()`역시 호출되지 않기에 `p.wg.wait()`이 즉시 호출됩니다. 그 때문에 동기화 문제도 발생하지 않는다.
+여기서 ping을 시도한다. 여기서 `p.Urls`가 비어있다고 하더라도, ping작업을 수행하지 않을 뿐 문제는 생기지 않는다. `p.wg.Add(1)`과 `p.wg.Done()`역시 호출되지 않기에 `p.wg.wait()`이 즉시 호출된다. 그 때문에 동기화 문제도 발생하지 않는다.
 
 지금은 pfSense의 Telegraf 설정에서 `Enable Ping Monitor`옵션을 켜고 `Ping Host`에 아무것도 적지 않고 저장하면 아래와 같은 Crash Report를 내보낸다.
 
@@ -122,7 +122,7 @@ Stack trace:
 Ping Host는 입력하는 창은 아래와 같이 돼 있다.
 ![Ping Host Input](./Ping_Host_input.png)
 
-여기서 분명 `Ping Host 1`은 `(optional)`표시가 없다. 그런데 비우고 저장해도 pfSense에서는 경고를 보내지 않는다. pfSense 2.7버전 이전에 `Enable Ping Monitor` 옵션을 켜고 `Ping Host`에 아무것도 적지 않고 저장한 사람들은 모두 같은 오류가 발생했을 것이다. 또한 이 오류에 대해서 여러 버그 리포트를 봤는데, 많은 사람들은 해당 문제를 재현하지 못했다고 말하고 있었다. 이것은 아마도 `Enable Ping Monitor` 옵션이 꺼진 상태에서 pfSense 2.6에서 2.7버전으로 업그레이드했기 때문에 문제가 발생하지 않았을 것으로 생각된다.
+여기서 분명 `Ping Host 1`은 `(optional)`표시가 없다. 그런데 비우고 저장해도 pfSense에서는 경고를 보내지 않는다. pfSense 2.7버전 이전에서 `Enable Ping Monitor` 옵션을 켜고 `Ping Host`에 아무것도 적지 않고 저장한 사람들은 모두 같은 오류가 발생했을 것이다. 또한 이 오류에 대해서 여러 버그 리포트를 봤는데, 많은 사람들은 해당 문제를 재현하지 못했다고 말하고 있었다. 이것은 아마도 `Enable Ping Monitor` 옵션이 꺼진 상태에서 pfSense 2.6에서 2.7버전으로 업그레이드했기 때문에 문제가 발생하지 않았을 것으로 생각된다.
 
 # 3 어떻게 해결할까?
 
@@ -179,7 +179,7 @@ pfSense는 `/conf/config.xml`이 모든 package들의 configuration이 저장된
 
 위와 같이 `$monitor_hosts`를 `array()`로 초기화하고 빈 배열인지 확인하고 다음 과정을 진행하면 될 것이다.
 
-이 해결 방법을 떠올리고 해당 패키지에 기여를 하고 싶어서 검색하다 pfSense package 저장소를 발견했는데, 완전히 같은 방법으로 이미 해결돼 있어서 놀랐다. 조금 더 관심을 두고 빨리 해결하고자 했으면 좋았을 것 같다. 또한 pfSense CE 2.8.0, pfSense Plus 24.08버전에서는 해당 패치가 포함돼 문제가 해결될 것 같다.
+이 해결 방법을 떠올리고 해당 패키지에 기여를 하고 싶어서 검색하다 pfSense package 저장소를 발견했는데, 완전히 같은 방법으로 이미 [해결](https://github.com/pfsense/FreeBSD-ports/blob/devel/net-mgmt/pfSense-pkg-Telegraf/files/usr/local/pkg/telegraf.inc)돼 있어서 놀랐다. 조금 더 관심을 두고 빨리 해결하고자 했으면 좋았을 것 같다. 또한 pfSense CE 2.8.0, pfSense Plus 24.08버전에서는 해당 패치가 포함돼 문제가 해결될 것 같다.
 
 # 후기
 
@@ -194,3 +194,4 @@ pfSense는 `/conf/config.xml`이 모든 package들의 configuration이 저장된
 -   [PHP manual Backward Incompatible Changes](https://www.PHP.net/manual/en/migration80.incompatible.PHP)
 -   [pfSense CE 2.7 upgrade note](https://docs.netgate.com/pfSense/en/latest/releases/2-7-0.html)
 -   [pfSense issues](https://redmine.pfSense.org/issues/14861)
+-   [issue fixed](https://github.com/pfsense/FreeBSD-ports/blob/devel/net-mgmt/pfSense-pkg-Telegraf/files/usr/local/pkg/telegraf.inc)
