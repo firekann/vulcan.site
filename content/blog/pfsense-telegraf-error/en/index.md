@@ -162,7 +162,7 @@ To disable it, modify the entry to:
 
 This will turn off the Ping Monitor option and prevent the error from occurring. Save the changes, and the issue should be resolved.
 
-## 3.3 Modify `telegraf.inc`
+## 3.3 Modify telegraf.inc
 
 Initially, it seemed that modifying the `telegraf.inc` file to fix the root cause of the problem would be a viable solution. However, the `telegraf.inc` file is re-downloaded from the server whenever the package is reinstalled or pfSense is rebooted. This means any changes made to the file are not permanent. Additionally, there is no straightforward way to restart the package after modifying the `telegraf.inc` file. Nonetheless, addressing the issue at its core is essential.
 
