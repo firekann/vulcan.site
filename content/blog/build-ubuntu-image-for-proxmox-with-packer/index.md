@@ -1,5 +1,5 @@
 ---
-title: Packer로 proxmox에 vm이미지 생성하기
+title: Packer로 proxmox에 VM 이미지 생성하기
 date: "2025-02-18T00:00:00Z"
 description: "Packer에 대해서"
 tags: ["proxmox", "packer", "ubuntu"]
