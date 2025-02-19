@@ -319,11 +319,11 @@ ubuntu server noble과 jammy 모두 지금까지의 값들은 당연한 이름 �
     }
 ```
 
-### 4.4.4. 나머지
+## 4.5. 나머지
 `meta-data`의 경우 필요하다면 사용하면 된다. 여기서는 아무것도 작성하지 않아도 된다.
 `99-pve.cfg`에는 `datasource_list: [ConfigDrive, NoCloud]` 한 줄만 있으면 되는데, 이것은 부팅 시에 cloud-init이 ConfigDrive를 먼저 진행할지, NoCloud로 먼저 진행할지를 정의하는 부분이다. proxmox의 경우 NoCloud방식을 사용한다. ConfigDrive를 먼저 확인하고 없다면 proxmox의 설정을 따르게 된다.
 
-### 4.4.5. run-packer.sh
+## 4.6. run-packer.sh
 ```sh
 #!/bin/bash
 
