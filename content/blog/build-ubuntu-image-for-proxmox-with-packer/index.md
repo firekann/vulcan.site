@@ -15,7 +15,7 @@ Packer는 이미지 빌드를 자동화해 주는 오픈소스 소프트웨어�
 
 이처럼 Packer는 DevOps 파이프라인의 가장 앞에서 가장 필수적이고 공통적인 패키지를 포함한 이미지를 미리 만들어둠으로써 배포 시간을 줄이고, 일관성을 유지할 수 있게 해준다. 이는 홈서버를 운영하는 입장에서도 매우 편리하다. 앞서 말한 ssh key, kakao mirror etc...들을 매번 세팅하는 건 매우 귀찮은 일이다. 특히 지인들과 서버를 공유하고 있다면 더욱 귀찮은 일이다. 이제 이 귀찮음을 해결해 보자.
 
-# 2. 설치
+# 2. install Packer
 기본적으로 Packer의 설정에 관한 문서는 [여기](https://developer.hashicorp.com/packer)에 아주 잘 정리돼 있다. ubuntu server noble에 설치할 거기 때문에 이 [튜토리얼](https://developer.hashicorp.com/packer/install#linux)을 따라 하자.
 ```sh
 wget -O - https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
@@ -29,7 +29,7 @@ Packer v1.12.0
 ```
 이런 식으로 나온다면 설치가 완료된 것이다.
 
-# 3. 폴더 구성
+# 3. directory configuration
 Packer를 이용해서 proxmox를 빌드하기 위해서는 packer Template에 사용될 폴더와 proxmox에 접속하기 위한 credentials를 저장할 파일이 필요하다. 그리고 이미지를 생성할 템플릿, ssh user의 credentials 파일, 설치 시 전달한 user data가 필요하다. 때문에 아래와 같이 폴더를 구성해서 jammy와 noble을 위한 Template를 작성할 것이다.
 ```css
 packer/
@@ -55,7 +55,7 @@ packer/
 ```
 `run-packer.sh`는 validate와 build를 편하게 하기 위해서 작성했다.
 
-# 4. 파일 설정
+# 4. file configuration
 ubuntu server noble(24.04.x)를 기준으로 진행하겠다.
 ## 4.1. credentials.pkr.hcl
 Packer가 proxmox에서 VM을 생성하고, 설정값을 입력하고, 이것을 template로 바꾸기 위해서는 어떤 방법으로든 proxmox의 쉘에 접속할 수밖에 없다. 이를 위해서 proxmox의 api_url, username과 password 혹은 token이 필요하다.(passward나 token 중 하나만 있어도 된다.) 이는 모든 template 파일에 포함돼야 하는데, 편의를 위해서 root 권한을 그대로 사용한다. 그 때문에 credentials 파일에서 username, password, token, api_url을 변수로 저장하고, 일관적으로 관리하려고 한다.(Packer를 위한 proxmox의 권한에 관련된 문서는 찾지 못했지만, 권한과 관련된 보안 이슈를 해결할 만한 솔루션을 발견했다. 해당 [이슈](https://github.com/hashicorp/packer-plugin-proxmox/issues/184)에 따라 pool, group, user를 생성하고 적절히 권한을 주고 Packer가 proxmox Template를 완전히 생성한 뒤 root 권한으로 원하는 pool로 생성된 Template를 이동시키면 될 듯하다.) 아래와같이 `credentials` 파일을 작성해 준다.
@@ -323,7 +323,7 @@ ubuntu server noble과 jammy 모두 지금까지의 값들은 당연한 이름 �
 `meta-data`의 경우 필요하다면 사용하면 된다. 여기서는 아무것도 작성하지 않아도 된다.
 `99-pve.cfg`에는 `datasource_list: [ConfigDrive, NoCloud]` 한 줄만 있으면 되는데, 이것은 부팅 시에 cloud-init이 ConfigDrive를 먼저 진행할지, NoCloud로 먼저 진행할지를 정의하는 부분이다. proxmox의 경우 NoCloud방식을 사용한다. ConfigDrive를 먼저 확인하고 없다면 proxmox의 설정을 따르게 된다.
 
-# 4.4.5. run-packer.sh
+### 4.4.5. run-packer.sh
 ```sh
 #!/bin/bash
 
@@ -357,7 +357,7 @@ packer build -var-file ../credentials.pkr.hcl -var-file ./ssh-user-credentials.p
 ./run-packer.sh -v ubuntu-server-noble.pkr.hcl
 ```
 
-# 5. 빌드
+# 5. validate and build
 위의 `run-packer` 스크립트를 이용해서 빌드해도 되지만, 일단은 정석적인 방법으로 빌드하려고 한다. 일단 Packer의 proxmox plugin을 설치해 준다.
 ```sh
 ~$ packer plugins install github.com/hashicorp/proxmox
