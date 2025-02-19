@@ -205,7 +205,7 @@ source "proxmox-iso" "ubuntu-server-noble" {
     memory      = "4096"
     #bios        = "ovmf"
     #efi_config {
-    #    efi_storage_pool    = "YOUR_STORAG_POOL" #e.g. local-lvm
+    #    efi_storage_pool    = "YOUR_STORAGE_POOL" #e.g. local-lvm
     #    efi_type            = "4m"
     #    pre_enrolled_keys   = true
     #}
@@ -394,6 +394,8 @@ validate가 성공했다면 비슷한 명령으로 build를 해준다.
 다음 글에서 Terraform으로 같은 이미지를 사용해서 k8s cluster를 위한 VM 여러 개를 배포하는 과정을 설명하려고 한다.
 
 잘못된 설명이나 추가로 설명했으면 좋겠는 부분, 오타, 맞춤법에 대한 지적은 언제나 환영합니다.
+
+* 이 글을 홈서버 사용자를 위한 것입니다. 실제 환경에서 사용할  때는 credential을 Vault나 환경 변수 등으로 좀 더 엄격하게 관리하고, dedicate 한 proxmox user, pool, token 사용을 고려하기를 바랍니다. Packer가 설치된 host의 보안에 충분한 주의를 기울이기를 바랍니다.
 
 # 참고
 [ChristianLempa](https://github.com/ChristianLempa) github/boilerplates
