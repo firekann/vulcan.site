@@ -33,25 +33,25 @@ Packer v1.12.0
 Packer를 이용해서 proxmox를 빌드하기 위해서는 packer Template에 사용될 폴더와 proxmox에 접속하기 위한 credentials를 저장할 파일이 필요하다. 그리고 이미지를 생성할 템플릿, ssh user의 credentials 파일, 설치 시 전달한 user data가 필요하다. 때문에 아래와 같이 폴더를 구성해서 jammy와 noble을 위한 Template를 작성할 것이다.
 ```css
 packer/
-├── ubuntu-server-jammy/
-│   ├── files/
+├── credentials.pkr.hcl
+├── ubuntu-server-jammy
+│   ├── files
 │   │   └── 99-pve.cfg
-│   ├── http/
+│   ├── http
 │   │   ├── meta-data
 │   │   └── user-data
 │   ├── run-packer.sh
 │   ├── ssh-user-credentials.pkr.hcl
 │   └── ubuntu-server-jammy.pkr.hcl
-├── ubuntu-server-noble/
-│   ├── files/
-│   │   └── 99-pve.cfg
-│   ├── http/
-│   │   ├── meta-data
-│   │   └── user-data
-│   ├── run-packer.sh
-│   ├── ssh-user-credentials.pkr.hcl
-│   └── ubuntu-server-noble.pkr.hcl
-└── credentials.pkr.hcl
+└── ubuntu-server-noble
+    ├── files
+    │   └── 99-pve.cfg
+    ├── http
+    │   ├── meta-data
+    │   └── user-data
+    ├── run-packer.sh
+    ├── ssh-user-credentials.pkr.hcl
+    └── ubuntu-server-noble.pkr.hcl
 ```
 `run-packer.sh`는 validate와 build를 편하게 하기 위해서 작성했다.
 
