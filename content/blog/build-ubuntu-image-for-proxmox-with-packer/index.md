@@ -395,7 +395,8 @@ validate가 성공했다면 비슷한 명령으로 build를 해준다.
 
 잘못된 설명이나 추가로 설명했으면 좋겠는 부분, 오타, 맞춤법에 대한 지적은 언제나 환영합니다.
 
-* 이 글을 홈서버 사용자를 위한 것입니다. 실제 환경에서 사용할  때는 credential을 Vault나 환경 변수 등으로 좀 더 엄격하게 관리하고, dedicate 한 proxmox user, pool, token 사용을 고려하기를 바랍니다. Packer가 설치된 host의 보안에 충분한 주의를 기울이기를 바랍니다.
+* 이 글을 홈서버 사용자를 위한 것입니다. 실제 환경에서 사용할 때는 credential을 Vault나 환경 변수 등으로 좀 더 엄격하게 관리하고, dedicate 한 proxmox user, pool, token 사용을 고려하기를 바랍니다. Packer가 설치된 host의 보안에 충분한 주의를 기울이기를 바랍니다.
+* 이 글을 포함해 인터넷에 존재하는 코드, 스크립트를 복사해 사용할 때는 코드, 스크립트를 충분히 읽고, 분석하여 문제가 없는지 확인하시기를 바랍니다. 최소한 ChatGPT 같은 AI에 해당 코드, 스크립트가 정말 안전하고 사용해도 되는지 확인받으시길 권장합니다.
 
 # 참고
 [ChristianLempa](https://github.com/ChristianLempa) github/boilerplates
